@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: localresearcher-ai
+    volumes:
+      - ./reports:/app/reports
+      - ./examples:/app/examples
+      - ./chroma_db:/app/chroma_db
+      - ./localresearcher.db:/app/localresearcher.db
+    environment:
+      - OLLAMA_BASE_URL=http://host.docker.internal:11434
+      - OLLAMA_MODEL=qwen2.5:latest
+      - OLLAMA_EMBEDDING_MODEL=nomic-embed-text:latest
+      - DATABASE_PATH=/app/localresearcher.db
+      - VECTOR_STORE_PATH=/app/chroma_db
+      - REPORTS_PATH=/app/reports
+    networks:
+      - localresearcher-network
+    command: tail -f /dev/null  # Keep container running
+
+networks:
+  localresearcher-network:
+    driver: bridge
