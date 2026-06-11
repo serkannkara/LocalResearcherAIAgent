@@ -28,8 +28,8 @@ console = Console()
 def ask(
     query: Annotated[str, typer.Argument(help="Research question or task")],
     files: Annotated[
-        list[Path] | None,
-        typer.Option("--files", "-f", help="Files to analyze"),
+        list[str] | None,
+        typer.Option("--files", "-f", help="Files to analyze (can be used multiple times)"),
     ] = None,
     output: Annotated[
         Path | None,
@@ -42,9 +42,21 @@ def ask(
     Examples:
         localresearcher ask "Analyze Apple's AI strategy"
         localresearcher ask "Summarize key findings" --files report.pdf
-        localresearcher ask "Create action plan" --files ./docs/*.md
+        localresearcher ask "Compare reports" --files Q1.pdf --files Q2.pdf
+        localresearcher ask "Analyze all docs" --files "./docs/*.md"
     """
-    asyncio.run(_ask_async(query, files, output))
+    file_paths = None
+    if files:
+        import glob
+        file_paths = []
+        for file_pattern in files:
+            expanded = glob.glob(file_pattern)
+            if expanded:
+                file_paths.extend([Path(f) for f in expanded])
+            else:
+                file_paths.append(Path(file_pattern))
+    
+    asyncio.run(_ask_async(query, file_paths, output))
 
 
 async def _ask_async(

@@ -7,7 +7,6 @@ from localresearcher.core.intent import Intent, IntentType, IntentDetectionResul
 class IntentClassifier:
     """Classifies user intent before routing to pipeline."""
     
-    # Simple pattern matching for common cases
     GREETING_PATTERNS = {
         "hello", "hi", "hey", "greetings", "good morning", 
         "good afternoon", "good evening", "good night"
@@ -31,7 +30,9 @@ class IntentClassifier:
         "analyze", "research", "summarize", "compare", "find",
         "investigate", "explore", "examine", "review", "evaluate",
         "assess", "study", "extract", "identify", "determine",
-        "what is", "what are", "explain", "describe", "tell me about"
+        "what is", "what are", "explain", "describe", "tell me about",
+        "design", "architecture", "trade-off", "tradeoff", "tradeoffs",
+        "production", "implementation", "when to use", "differences"
     }
     
     def __init__(self, llm: BaseLLMProvider):
@@ -44,8 +45,8 @@ class IntentClassifier:
     ) -> IntentDetectionResult:
         """Classify user intent."""
         query_lower = query.lower().strip()
+        token_count = len(query_lower.split())
         
-        # CRITICAL: If files provided, it's ALWAYS document analysis
         if has_documents:
             return IntentDetectionResult(
                 query=query,
@@ -58,9 +59,20 @@ class IntentClassifier:
                 ),
             )
         
-        # Only check greeting/small-talk if NO files provided
-        # Fast path: Pattern matching for common intents
-        if self._is_greeting(query_lower):
+        if token_count > 5:
+            if self._is_research_query(query_lower):
+                return IntentDetectionResult(
+                    query=query,
+                    intent=Intent(
+                        type=IntentType.RESEARCH,
+                        confidence=0.95,
+                        reasoning="Query contains research keywords and is substantial",
+                        requires_documents=False,
+                        requires_research=True,
+                    ),
+                )
+        
+        if self._is_greeting(query_lower, token_count):
             return IntentDetectionResult(
                 query=query,
                 intent=Intent(
@@ -112,33 +124,44 @@ class IntentClassifier:
                 suggested_response=await self._get_small_talk_response(query),
             )
         
-        # Check if it's clearly a research query
-        if self._is_research_query(query_lower) or has_documents:
+        if self._is_research_query(query_lower):
             return IntentDetectionResult(
                 query=query,
                 intent=Intent(
                     type=IntentType.RESEARCH,
                     confidence=0.85,
-                    reasoning="Query contains research keywords or has documents",
+                    reasoning="Query contains research keywords",
                     requires_documents=has_documents,
                     requires_research=True,
                 ),
             )
         
-        # Ambiguous case: Use LLM for classification
         return await self._classify_with_llm(query, has_documents)
     
-    def _is_greeting(self, query: str) -> bool:
+    def _is_greeting(self, query: str, token_count: int) -> bool:
         """Check if query is a greeting."""
-        return any(pattern in query for pattern in self.GREETING_PATTERNS)
+        if token_count > 5:
+            return False
+        
+        query_stripped = query.strip().rstrip('!?.,:;')
+        
+        if query_stripped in self.GREETING_PATTERNS:
+            return True
+        
+        words = query_stripped.split()
+        if len(words) <= 3:
+            return any(pattern == query_stripped for pattern in self.GREETING_PATTERNS)
+        
+        return False
     
     def _is_farewell(self, query: str) -> bool:
         """Check if query is a farewell."""
-        return any(pattern in query for pattern in self.FAREWELL_PATTERNS)
+        query_stripped = query.strip().rstrip('!?.,:;')
+        return query_stripped in self.FAREWELL_PATTERNS
     
     def _is_gratitude(self, query: str) -> bool:
         """Check if query is gratitude."""
-        return any(pattern in query for pattern in self.GRATITUDE_PATTERNS)
+        return any(query.strip().startswith(pattern) for pattern in self.GRATITUDE_PATTERNS)
     
     def _is_small_talk(self, query: str) -> bool:
         """Check if query is small talk."""

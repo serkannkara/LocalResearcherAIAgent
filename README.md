@@ -1,23 +1,23 @@
- # 🔬 LocalResearcherAI
+# 🔬 LocalResearcherAI
  
  **Don't just ask AI. Understand why it answered.**
- 
+
  **Private by default. Transparent by design.**
- 
+
  <p align="center">
    <img src="architecture.png" alt="LocalResearcherAI Architecture" width="100%">
  </p>
- 
+
  A local-first, explainable document research system focused on transparency and trust.  
  **Your documents never leave your computer.**
- 
+
  [![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
  [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
  [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
- 
+
  ---
  
- ## ✨ Why People Like LocalResearcherAI
+## ✨ Why People Like LocalResearcherAI
  
  - 🔒 **100% Local Processing** - No API keys, no cloud, complete privacy
  - 🧠 **Multi-Agent Research Pipeline** - 5 specialized agents working together
@@ -25,16 +25,16 @@
  - 🔍 **Transparent Modes** - Clear separation between knowledge vs evidence
  - ⚠️ **Honest About Limitations** - Never pretends to have sources it doesn't
  - 📝 **Beautiful Markdown Reports** - Professional output, fully customizable
- 
+
  ---
  
- ## 🎯 Why This Project?
+## 🎯 Why This Project?
  
  **The Problem**: AI tools are black boxes. You get answers but don't know why.
- 
+
  **Our Solution**: A transparent, local-first research system that shows you its reasoning.
  
- ### What Works Today (v0.1.0)
+### What Works Today (v0.1.0)
  
  | Feature | Status | Notes |
  |---------|--------|-------|
@@ -48,105 +48,304 @@
  | **Per-claim confidence** | 📅 Planned | Phase 2 (see roadmap) |
  | **Evidence attribution** | 📅 Planned | Phase 2 (see roadmap) |
  | **Web search** | 📅 Planned | Phase 3 (see roadmap) |
- 
+
  **Legend**: ✅ Ready | 🚧 In Progress | 📅 Planned
- 
+
  ---
  
- ## ⚡ Quick Start
- 
- ```bash
+## ⚡ Quick Start
+
+ \`\`\`bash
  # 1. Clone and install
- git clone https://github.com/serkannkara/LocalResearcherAI.git
- cd LocalResearcherAI
+ git clone https://github.com/serkannkara/localresearcher-ai.git
+ cd localresearcher-ai
  ./install.sh
- 
+  
  # 2. Pull models (one-time setup)
  ollama pull qwen2.5:latest
  ollama pull nomic-embed-text:latest
- 
+  
  # 3. Run your first query
  localresearcher ask "Summarize key findings" --files examples/sample.md
- ```
- 
+ \`\`\`
+
  **Expected time**: Typically within seconds to tens of seconds depending on your hardware and model.
- 
+
  ---
  
- ## 🎬 How It Works
+## 🎬 How It Works
  
- ### Two Modes: Knowledge vs Evidence
+### Two Modes: Knowledge vs Evidence
  
  **The key difference that makes us transparent:**
- 
+
  | Mode | Source | Speed | Confidence | Use Case |
  |------|--------|-------|------------|----------|
  | 🧠 **Knowledge** | Model's training data | Fast | 🔴 LOW | Quick explanations |
  | 🔬 **Evidence** | Your documents | Normal | 🟢 HIGH | Verified research |
  
- ### 🧠 Knowledge Mode (No Documents)
+### 🧠 Knowledge Mode (No Documents)
  
  **Model knows → General explanation**
- 
+
  - Uses LLM's internal knowledge
  - Fast responses
  - Clearly marked as "not verified research"
  - **Confidence: LOW**
- 
- ```bash
+
+ \`\`\`bash
  localresearcher ask "What is Agentic AI?"
  # → Quick explanation from model knowledge
  # → Clearly marked with limitations
- ```
- 
- ### 🔬 Evidence Mode (With Documents)
+ \`\`\`
+
+### 🔬 Evidence Mode (With Documents)
  
  **Documents prove → Evidence-backed analysis**
- 
+
  - Analyzes your provided documents
  - RAG-based retrieval
  - Evidence-aware responses
  - **Confidence: MEDIUM-HIGH**
- 
- ```bash
+
+ \`\`\`bash
  # Analyze a single document
  localresearcher ask "Summarize findings" --files report.pdf
- 
+  
  # Analyze multiple documents
- localresearcher ask "Compare these reports" --files Q1.pdf Q2.pdf
- 
+ localresearcher ask "Compare these reports" --files Q1.pdf --files Q2.pdf
+  
  # Use glob patterns
- localresearcher ask "Analyze all docs" --files ./documents/*.md
- ```
- 
+ localresearcher ask "Analyze all docs" --files "./documents/*.md"
+ \`\`\`
+
  **Note**: Repository analysis is planned for Phase 3. Currently, use --files for document analysis.
- 
+
  ---
  
- ## 🏗️ Architecture
- 
- <p align="center">
-   <img src="architecture.png" alt="System Architecture" width="90%">
- </p>
- 
- ### 5-Agent Pipeline
- 
- **What each agent does:**
- 
- 1. **🗓️ Planner** - Breaks down the research task into steps
- 2. **🔍 Researcher** - Retrieves relevant information (RAG if documents available)
- 3. **📊 Analyst** - Analyzes and synthesizes findings
- 4. **🛡️ Critic** - Evaluates quality and identifies gaps
- 5. **✍️ Writer** - Generates final markdown report
- 
- All agents share state through **WorkflowState** for complete transparency.
- 
+## 🏗️ Architecture
+
+### System Overview
+
+ LocalResearcherAI uses a **5-agent pipeline** orchestrated through a central workflow state.
+ Each agent has a specialized role and contributes to the final research report.
+
+### Request Flow
+
+ \`\`\`
+ ┌─────────────────────────────────────────────────────────────────┐
+ │                         User Query                               │
+ │                   "Compare RAG vs MCP"                          │
+ └────────────────────┬────────────────────────────────────────────┘
+                      │
+                      ▼
+ ┌─────────────────────────────────────────────────────────────────┐
+ │                    Intent Classifier                             │
+ │  • Pattern matching (fast path)                                 │
+ │  • LLM fallback (ambiguous cases)                              │
+ │  • Routes: RESEARCH | GREETING | SMALL_TALK                    │
+ └────────────────────┬────────────────────────────────────────────┘
+                      │
+              ┌───────┴───────┐
+              │               │
+              ▼               ▼
+    ┌──────────────┐    ┌──────────────┐
+    │   GREETING   │    │   RESEARCH   │
+    │  Quick Reply │    │  Full Pipeline│
+    └──────────────┘    └──────┬────────┘
+                               │
+                               ▼
+              ┌────────────────────────────────┐
+              │    Workflow State Manager      │
+              │  • Tracks agent outputs        │
+              │  • Manages document context    │
+              │  • Enables transparency        │
+              └────────┬───────────────────────┘
+                       │
+         ┌─────────────┼─────────────┐
+         │             │             │
+         ▼             ▼             ▼
+    ┌─────────┐  ┌──────────┐  ┌─────────┐
+    │ Agent 1 │  │ Agent 2  │  │Agent 3-5│
+    │ Planner │→ │Researcher│→ │ A→C→W   │
+    └─────────┘  └────┬─────┘  └─────────┘
+                      │
+                      ▼
+           ┌──────────────────────┐
+           │   RAG Layer          │
+           │ ┌──────────────────┐ │
+           │ │  Vector Store    │ │
+           │ │  (ChromaDB)      │ │
+           │ └────────┬─────────┘ │
+           │          │           │
+           │ ┌────────▼─────────┐ │
+           │ │  Embeddings      │ │
+           │ │  nomic-embed-text│ │
+           │ └──────────────────┘ │
+           └──────────────────────┘
+                      │
+                      ▼
+              ┌──────────────┐
+              │     LLM      │
+              │ Ollama/Qwen  │
+              └──────────────┘
+ \`\`\`
+
+### 5-Agent Pipeline (Sequential Execution)
+
+ **1. 🗓️ Planner Agent**
+ - **Input**: User query + available documents
+ - **Output**: Structured research plan
+ - **Purpose**: Breaks down complex questions into actionable steps
+ - **Example**: "1. Define RAG and MCP, 2. Compare architectures, 3. Identify trade-offs"
+
+ **2. 🔍 Researcher Agent**
+ - **Input**: Query + plan + (optional) document context via RAG
+ - **Output**: Raw research findings
+ - **Purpose**: Gathers information from documents or model knowledge
+ - **RAG Process**:
+   - Query → Embeddings → Vector search → Top-K chunks → Context
+
+ **3. 📊 Analyst Agent**
+ - **Input**: Query + plan + research findings
+ - **Output**: Structured analysis
+ - **Purpose**: Synthesizes findings, identifies patterns, draws insights
+ - **Example**: Groups findings by theme, identifies contradictions
+
+ **4. 🛡️ Critic Agent**
+ - **Input**: Query + analysis
+ - **Output**: Quality evaluation + gaps identified
+ - **Purpose**: Ensures completeness, identifies missing information
+ - **Example**: "Analysis lacks performance benchmarks. Recommend adding metrics."
+
+ **5. ✍️ Writer Agent**
+ - **Input**: Query + plan + findings + analysis + critique
+ - **Output**: Final markdown report
+ - **Purpose**: Generates professional, well-structured report
+ - **Modes**:
+   - **Knowledge Mode**: Adds disclaimer about no external sources
+   - **Evidence Mode**: Includes document references and higher confidence
+
+### Data Flow: Knowledge vs Evidence Mode
+
+ **🧠 Knowledge Mode (No Documents)**
+ \`\`\`
+ Query → Intent → [Planner] → [Researcher (model only)] → [Analyst] → [Critic] → [Writer + Disclaimer] → Report
+                                                                                        ↓
+                                                                            "⚠️ No external sources"
+ \`\`\`
+
+ **🔬 Evidence Mode (With Documents)**
+ \`\`\`
+ Query + Files → Intent → Load Docs → Embed → Vector Store
+                              │                     │
+                              ▼                     ▼
+                         [Planner] ──────────→ [Researcher + RAG]
+                              │                     │
+                              ▼                     ▼
+                         WorkflowState ←──── [Analyst + Context]
+                              │                     │
+                              ▼                     ▼
+                         [Critic] ────────────→ [Writer + Citations]
+                              │                     │
+                              └─────────────────────┘
+                                       ▼
+                              "✅ Evidence-backed report"
+ \`\`\`
+
+### Technology Stack
+
+ | Layer | Technology | Purpose |
+ |-------|-----------|---------|
+ | **CLI** | Typer | User interface |
+ | **Orchestration** | Python asyncio | Workflow coordination |
+ | **LLM** | Ollama (qwen2.5:7b) | Language model inference |
+ | **Embeddings** | nomic-embed-text | Document vectorization |
+ | **Vector DB** | ChromaDB | Similarity search |
+ | **Document Loading** | pypdf, python-magic | Multi-format support |
+ | **Output** | Rich, Markdown | Beautiful terminal + reports |
+
+### State Management (WorkflowState)
+
+ The `WorkflowState` object is the **single source of truth** throughout the pipeline:
+
+ \`\`\`python
+ WorkflowState:
+   ├── task: Task                    # Original query + documents
+   ├── current_step: AgentStep       # PLANNING | RESEARCHING | ANALYZING | ...
+   ├── plan: str                     # From Planner
+   ├── research_findings: str        # From Researcher
+   ├── analysis: str                 # From Analyst
+   ├── critique: str                 # From Critic
+   ├── final_report: str             # From Writer
+   └── outputs: list[AgentOutput]    # Complete audit trail
+ \`\`\`
+
+ **Transparency benefit**: Every agent's contribution is tracked and can be inspected.
+
+### Performance Characteristics
+
+ **Bottlenecks** (MacBook Air M2, 16GB):
+ - **LLM Generation**: 15-18s (5 agents × ~3s each)
+ - **Vector Search**: <200ms (negligible)
+ - **Document Loading**: 1-2s for 100 pages
+ - **Total Pipeline**: ~20s for full research workflow
+
+ **Optimization Strategies**:
+ - Intent detection fast-path (pattern matching before LLM)
+ - ChromaDB persistent storage (no re-indexing)
+ - Parallel-ready architecture (future: concurrent agent execution)
+
+### Error Handling & Recovery
+
+ **File Validation (Pre-Pipeline)**:
+ - Validates ALL files exist before any processing
+ - Fails fast with clear error messages
+ - Example: "❌ File not found: Q2.pdf"
+
+ **Ollama Availability Check**:
+ - Checks connection before workflow starts
+ - Provides actionable error: "ollama pull qwen2.5:latest"
+
+ **Graceful Degradation**:
+ - Vector search failure → Continue with model knowledge only
+ - Missing documents → Knowledge Mode with clear disclaimer
+
+ **Cleanup**:
+ - Always closes LLM and vector store connections
+ - Prevents resource leaks
+
+### Security & Privacy
+
+ **100% Local Execution**:
+ - ❌ No API keys required
+ - ❌ No data sent to cloud
+ - ✅ All processing on-device
+ - ✅ Documents never leave your machine
+
+ **Data Storage**:
+ - Vector database: Local ChromaDB (`./chroma_db/`)
+ - Reports: Local filesystem (`./reports/`)
+ - No telemetry or tracking
+
+### Extensibility Points
+
+ **Easy to extend**:
+
+ 1. **Add new document formats**: Implement `DocumentLoader` protocol
+ 2. **Add new agents**: Extend `BaseAgent` class
+ 3. **Change LLM provider**: Implement `BaseLLMProvider` interface
+ 4. **Custom vector store**: Implement `VectorStore` interface
+ 5. **Add web search**: Insert between Researcher and Analyst
+
+ Future plugin system (Phase 6) will formalize these extension points.
+
  ---
  
- ## 📊 Performance Benchmarks
+## 📊 Performance Benchmarks
  
  **Test Environment**: MacBook Air M2, 16GB RAM
- 
+
  | Task | Time | Details |
  |------|------|---------|
  | **Intent Detection** | <0.5s | Pattern matching + LLM fallback |
@@ -155,86 +354,86 @@
  | **RAG Retrieval** | 180ms | ChromaDB similarity search |
  | **Full Pipeline** | ~20s | End-to-end with all agents |
  | **RAM Peak** | 5.3GB | Includes model |
- 
+
  **Note**: Results vary depending on hardware and model size.
- 
+
  **Model**: qwen2.5:7b (4.7GB)  
  **Vector DB**: ChromaDB (persistent)  
  **Embedding**: nomic-embed-text (274MB)
- 
+
  ---
  
- ## 🌟 What Makes Us Different
+## 🌟 What Makes Us Different
  
- ### Transparency First
+### Transparency First
  
  **We don't pretend to have sources we don't have.**
- 
+
  **Knowledge Mode** clearly states:
  - ❌ No external documents
  - ❌ No citations available
  - ❌ Information may be outdated
  - 🔴 Confidence: LOW
- 
+
  **Evidence Mode** clearly shows:
  - ✅ Documents analyzed
  - ✅ RAG-based retrieval
  - ✅ Source-aware responses
  - 🟢 Confidence: MEDIUM-HIGH
  
- ### Honest About Limitations
- 
- ```markdown
+### Honest About Limitations
+
+ \`\`\`markdown
  ⚠️  Knowledge Mode Notice
- 
+  
  This response was generated from the language model's 
  internal knowledge.
- 
+  
  - ❌ No external documents were analyzed
  - ❌ No evidence citations available
  - ❌ Information may be outdated
- 
+  
  Confidence Level: LOW
- ```
- 
+ \`\`\`
+
  This honesty is **rare** in AI tools.
- 
+
  ---
  
- ## 🚀 Future: Explainability (Phase 2)
+## 🚀 Future: Explainability (Phase 2)
  
- ### What's Coming (Not Yet Available)
- 
- ```markdown
+### What's Coming (Not Yet Available)
+
+ \`\`\`markdown
  ## Conclusion: Local AI adoption is accelerating
- 
+  
  ### Evidence:
  1. ✅ **Source**: market-report.pdf (Page 12)
     - Quote: "65% of enterprises prioritizing on-premise AI"
     - **Confidence: 95%**
     - Weight: High
- 
+  
  2. ⚠️  **Source**: industry-blog.md
     - Quote: "Local models gaining traction"
     - **Confidence: 67%**
     - Weight: Low
- 
+  
  ### Overall Confidence: 93%
- 
+  
  ### Reasoning Chain:
  1. Identified theme across documents
  2. Cross-referenced data sources
  3. Validated statistical claims
  4. Weighted by source reliability
- ```
+ \`\`\`
  
  **Status**: 🚧 Planned for Phase 2 (Evidence Attribution & Confidence Scoring)
- 
+
  See [ROADMAP.md](ROADMAP.md) for details.
- 
+
  ---
  
- ## 🎯 Roadmap
+## 🎯 Roadmap
  
  | Phase | Focus | Status |
  |-------|-------|--------|
@@ -244,116 +443,132 @@
  | **Phase 4** | Web UI + Workspaces | 📅 Future |
  | **Phase 5** | Web search integration | 📅 Future |
  | **Phase 6** | MCP ecosystem | 📅 Vision |
- 
+
  **Full details**: [ROADMAP_PRAGMATIC.md](ROADMAP_PRAGMATIC.md)
- 
+
  ---
  
- ## 🏆 Use Cases
+## 🏆 Use Cases
  
- ### Academic Research
+### Academic Research
  - Analyze multiple papers
  - Generate literature summaries
  - Find contradictions across sources
+
+ \`\`\`bash
+ localresearcher ask "Compare methodologies" --files paper1.pdf --files paper2.pdf
+ \`\`\`
  
- ### Business Analysis
+### Business Analysis
  - Quarterly report analysis
  - Market research synthesis
  - Competitive intelligence
+
+ \`\`\`bash
+ localresearcher ask "Compare Q1 vs Q2 performance" --files Q1.pdf --files Q2.pdf
+ \`\`\`
  
- ### Legal Review
+### Legal Review
  - Contract analysis
  - Document comparison
  - Evidence organization
+
+ \`\`\`bash
+ localresearcher ask "Identify key differences" --files contract_v1.pdf --files contract_v2.pdf
+ \`\`\`
  
- ### Personal Knowledge Management
+### Personal Knowledge Management
  - Organize research notes
  - Synthesize learning materials
  - Build knowledge base
- 
+
+ \`\`\`bash
+ localresearcher ask "Summarize my learning" --files "./notes/*.md"
+ \`\`\`
+
  ---
  
- ## 💎 First Experience
+## 💎 First Experience
  
  We obsess over your first 5 minutes:
- 
+
  **Minute 1**: Clone and run `./install.sh`  
  **Minute 2**: Ollama pulls models (automatic)  
  **Minute 3**: Test with `localresearcher ask "Hello"`  
  **Minute 4**: Try with a document: `--files examples/sample.md`  
  **Minute 5**: Explore your first report in `reports/`  
- 
+
  **If you're not impressed in 5 minutes, we failed.**
- 
+
  ---
  
- ## 🚀 Earning "ResearchOS"
+## 🚀 Earning "ResearchOS"
  
  We don't call it "ResearchOS" yet. That name is **earned**, not claimed.
- 
+
  **Current (v0.1.0)**: LocalResearcherAI  
  → "Transparent local document research"
- 
+
  **Future (v2.0.0)**: ResearchOS  
  → "Operating system for knowledge work"
- 
+
  **How we earn it**:
  - ✅ Build trust through transparency
  - ✅ Deliver explainability at scale
  - ✅ Create plugin ecosystem
  - ✅ Enable team collaboration
  - ✅ Prove value with real users
- 
+
  Until then: **Stay focused. Build trust. Deliver value.**
- 
+
  See [VISION_2.0.md](VISION_2.0.md) for the long-term vision.
- 
+
  ---
  
- ## 🎤 One-Line Pitch
+## 🎤 One-Line Pitch
  
  **"Local-first, transparent AI research. Know why, not just what."**
  
  ---
  
- ## 📖 Documentation
+## 📖 Documentation
  
  - [Quick Start](docs/QUICKSTART.md)
  - [Architecture](docs/ARCHITECTURE.md)
  - [Roadmap](ROADMAP_PRAGMATIC.md)
  - [Contributing](CONTRIBUTING.md)
  - [Vision](VISION_2.0.md)
- 
+
  ---
  
- ## 🤝 Contributing
+## 🤝 Contributing
  
  We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
- 
+
  **Good first issues**:
  - Add new document format loaders
  - Improve error messages
  - Write tutorials
  - Add tests
- 
+
  ---
  
- ## 📄 License
+## 📄 License
  
  MIT License - see [LICENSE](LICENSE) for details.
- 
+
  ---
  
- ## 🙏 Acknowledgments
+## 🙏 Acknowledgments
  
  Built with:
  - [Ollama](https://ollama.ai/) - Local LLM inference
  - [ChromaDB](https://www.trychroma.com/) - Vector database
  - [Typer](https://typer.tiangolo.com/) - CLI framework
  - [Rich](https://rich.readthedocs.io/) - Terminal UI
- 
+
  ---
- 
- **Made with ❤️ by the Serkan Kara **
- 
+
+ **Made with ❤️ by Serkan Kara**
+
  ⭐ Star us on GitHub if you find this useful!
