@@ -140,14 +140,36 @@ bash localresearcher ask "Analyze all notes" --files "./documents/*.md"
 
 ### Workflow State
 
-The workflow state is the single source of truth during execution.
+The `WorkflowState` object acts as the single source of truth.
 
-text WorkflowState │ ├─ Task │  └─ Original query + documents │ ├─ Current Step │  └─ Planning / Research / Analysis / Critique / Writing │ ├─ Planner Output ├─ Research Findings ├─ Analysis ├─ Critique ├─ Final Report │ └─ Agent Outputs    └─ Complete audit trail 
+```text
+WorkflowState
+│
+├── Task
+│   └── Original query + attached documents
+│
+├── Current Step
+│   └── Planning
+│       Research
+│       Analysis
+│       Critique
+│       Writing
+│
+├── Planner Output
+├── Research Findings
+├── Analysis
+├── Critique
+├── Final Report
+│
+└── Agent Outputs
+    └── Complete execution history and audit trail
+```
 
-This enables transparency, debugging and future replay/export features.
+Every agent reads from and writes back to this shared state.
 
 ### Technology Stack
 
+```text
 | Layer | Technology |
 |---|---|
 | CLI | Typer + Rich |
@@ -157,7 +179,7 @@ This enables transparency, debugging and future replay/export features.
 | Vector DB | ChromaDB |
 | Document loading | pypdf, Markdown, TXT |
 | Reports | Markdown |
-
+```
 ---
 
 ## Performance
@@ -177,6 +199,7 @@ Performance depends on hardware, model size and document length.
 
 ## Roadmap
 
+```text
 | Phase | Focus | Status |
 |---|---|---:|
 | Phase 1 | Local multi-agent MVP | ✅ Complete |
@@ -185,7 +208,7 @@ Performance depends on hardware, model size and document length.
 | Phase 4 | Web UI + workspaces | 📅 Future |
 | Phase 5 | Web search integration | 📅 Future |
 | Phase 6 | MCP ecosystem | 📅 Vision |
-
+```
 See ROADMAP_PRAGMATIC.md for details.
 
 ---
