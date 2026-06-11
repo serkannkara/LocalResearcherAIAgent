@@ -126,7 +126,7 @@
  ## 🏗️ Architecture
  
  <p align="center">
-   <img src="docs/images/architecture.png" alt="System Architecture" width="90%">
+   <img src="architecture.png" alt="System Architecture" width="90%">
  </p>
  
  ### 5-Agent Pipeline
