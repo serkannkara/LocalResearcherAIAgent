@@ -269,17 +269,24 @@
 
  The `WorkflowState` object is the **single source of truth** throughout the pipeline:
 
- \`\`\`python
- WorkflowState:
-   ├── task: Task                    # Original query + documents
-   ├── current_step: AgentStep       # PLANNING | RESEARCHING | ANALYZING | ...
-   ├── plan: str                     # From Planner
-   ├── research_findings: str        # From Researcher
-   ├── analysis: str                 # From Analyst
-   ├── critique: str                 # From Critic
-   ├── final_report: str             # From Writer
-   └── outputs: list[AgentOutput]    # Complete audit trail
- \`\`\`
+```text
+WorkflowState
+│
+├─ Task
+│  └─ Original query + documents
+│
+├─ Current Step
+│  └─ Planning / Research / Analysis / Critique / Writing
+│
+├─ Planner Output
+├─ Research Findings
+├─ Analysis
+├─ Critique
+├─ Final Report
+│
+└─ Agent Outputs
+   └─ Complete audit trail
+```
 
  **Transparency benefit**: Every agent's contribution is tracked and can be inspected.
 
