@@ -715,35 +715,12 @@ Built with ❤️ using these amazing open-source projects:
 - **[Pydantic](https://docs.pydantic.dev/)** - Data validation using Python type hints
 - **[Qwen Team](https://github.com/QwenLM)** - Powerful open-source language models
 
-### Citations
-
-If you use LocalResearcherAI in academic work, please cite:
-
-```bibtex
-@software{localresearcherai2024,
-  author = {Kara, Serkan},
-  title = {LocalResearcherAI: Local-First Multi-Agent Research Assistant},
-  year = {2024},
-  url = {https://github.com/serkannkara/LocalResearcherAI},
-  note = {Open-source agentic research system using local LLMs}
-}
-```
-
 ### Special Thanks
 
 - **Ollama Community** for making local AI practical
 - **LangChain Team** for pioneering agent architectures
  - **Anthropic** for advancing interpretable AI research
  - **Early testers** for valuable feedback
- 
- ---
- 
- ## 📞 Contact & Support
- 
- - **Issues**: [GitHub Issues](https://github.com/serkannkara/LocalResearcherAI/issues)
- - **Discussions**: [GitHub Discussions](https://github.com/serkannkara/LocalResearcherAI/discussions)
- - **Email**: serkankara@example.com
- - **Twitter**: [@serkannkara](https://twitter.com/serkannkara)
  
  ---
  
